@@ -2,7 +2,9 @@
 title: 'Week1 HomeWork: RMarkDown Examples'
 author: "Muharrem Çakır"
 date: "October 15, 2018"
-output: html_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ## Who am I and what is my aim ? 
@@ -16,7 +18,7 @@ My aim is develop myself and help our customers especially about big data and an
 Below, I added 3 examples about R and how we can use it in Data Science projects in various sectors.
 
 ## Segmentation . How to perform k-means Clustering in R
-Customer Segmentation is very important. İf you can do is successfuly, Yo can manage your campaign or you can do any other predictive models like churn, propensity successfully. 
+Customer Segmentation is very important. İf you can do it successfuly, Yo can manage your campaign or you can do any other predictive models like churn, propensity successfully. 
 In this video, you can find how to perfomr k-means clustering method in R. 
 
 <a href="https://www.youtube.com/watch?v=sAtnX3UJyN0">Segmentation with k-means Clustering </a>
