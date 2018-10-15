@@ -35,6 +35,8 @@ Having trouble with Pages? Check out our [documentation](https://help.github.com
 
 ### Week1
 BDA503; in first week we made introduction to R. vectors,matrix,list, data frames. Factors, some usefull functions and operations we learned.  
-
-[Rmarkdown Example](Week1/Week1_Homework_RMarkdown.html) <br>
 Here is my first Rmarkdown.
+[Rmarkdown Example]pj18-muharremcakir81/Week1/Week1_Homework_RMarkdown.html <br>
+        
+      
+
