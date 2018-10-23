@@ -6,8 +6,9 @@ We learned main subjects in R. These are vectors,matrix,list, data frames.During
 ### Week2
 We learned data manipulation in R with dplyr package . Some of useful functions in dplyr packages are : select, filter, arrenge, mutate, transmute, groupby, summarise, lead,lag,slice, gather,  spread. 
 We tried to do some exercises in lesson. An homework is  assigned to us.
-ODD June 2018 car sales analysis
-You can get my R data file for the term 2018 June from here
+[ODD June 2018 car sales analysis](week2/week2.html)<br>
+[You can get my R data file for the term 2018 June from here](week2/odd_car_sales_data_april_18.rds)<br>
+
         
       
 
