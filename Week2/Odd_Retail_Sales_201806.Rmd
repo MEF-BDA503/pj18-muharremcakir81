@@ -1,0 +1,75 @@
+---
+title: "ODD_Retail_Sales_201806"
+author: "Muharrem Cakir"
+date: "October 23, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Car Sales Data Import and Analyze
+
+In week-2 we studied with tidyverse package and some functions in this package. This homework is about it. After we downloaded data from ODD official website, we changed the name to ODD_Retail_Sales_201806.xlsx. We will make some example from raw data to final analysis below.
+
+##Download Data
+
+At first, we load the data in our R workspace via the code below
+
+```{r cars}
+install.packages("tidyverse", repos = "https://cran.r-project.org")
+
+library(tidyverse)
+library(readxl)
+tmp<-tempfile(fileext=".xlsx")
+download.file("https://github.com/MEF-BDA503/pj18-muharremcakir81/blob/master/Week2/Odd_Retail_Sales_2018_06.xlsx?raw=true",destfile=tmp,mode = 'wb')
+raw_data<-readxl::read_excel(tmp,skip=7,col_names=FALSE)
+# Let's see our raw data
+head(raw_data)
+file.remove(tmp)
+```
+
+## Make Data Civilized
+Now we need to remove NA values and define column names to make data standardized.
+
+```{r}
+colnames(raw_data) <- c("brand_name","auto_dom","auto_imp","auto_total","comm_dom","comm_imp","comm_total","total_dom","total_imp","total_total")
+# Now we replace NA values with 0 and label the time period with year and month, so when we merge the data we won't be confused.
+car_data_201806 <- raw_data %>% mutate_if(is.numeric,funs(ifelse(is.na(.),0,.))) %>% mutate(year=2018,month=6)
+                   
+#TO save our data;
+saveRDS(car_data_201806,file="Odd_Retail_Sales_201806.rds")
+                 
+print(car_data_201806,width=Inf)
+```
+
+##Let's make Some Analysis
+
+Our data is ready to make analysis.
+
+In first analyse , we can see the percentage of total_dom and percentage of total_imp for each brand ordered in decreasing Percentage_dom.
+
+```{r}
+car_data_201806 %>% select(year, month, brand_name, total_total,total_dom,total_imp) %>% 
+  mutate(Percentage_dom=total_dom/total_total * 100,Percentage_imp=total_imp/total_total * 100)  %>%
+  select(year, month, brand_name, total_total,Percentage_dom,Percentage_imp) %>% 
+  arrange(desc(Percentage_dom)) 
+```
+
+In second analyse , we can see the percentage of Auto_total and percentage of comm_total for each brands their percentage of total_dom greater than %50 ordered in decreasing Total Sales..
+
+```{r}
+car_data_201806 %>% select(year, month, brand_name, total_total,total_dom,total_imp,comm_total,auto_total) %>% 
+  mutate(Percentage_dom=total_dom/total_total * 100,Percentage_Auto=auto_total/total_total * 100,Percentage_comm=comm_total/total_total * 100) %>%  filter(Percentage_dom > 50 ) %>%
+  select(year, month, brand_name,total_total,Percentage_Auto,Percentage_comm) %>% 
+  arrange(desc(total_total)) 
+```
+In third and last analyse , we can see the 14 brands theirs total sales is above the average total sales of all brands.
+```{r}
+car_data_201806 %>% select(year, month, brand_name, total_total) %>% 
+  mutate(average_Total=mean(total_total) ) %>%  
+  filter(total_total > average_Total)  %>%
+  arrange(desc(total_total)) 
+```
+
