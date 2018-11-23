@@ -1,0 +1,167 @@
+---
+title: "ODD Assignment Part2"
+author: "Muharrem Çakır"
+date: "23 Kasım 2018"
+output: html_document
+---
+## Install Package
+In week 2 everyone was studied just one period of ODD data. Now we combine all data and   we can study all periods to make deep analyses.
+First of all we have to install some package that will be  used below.
+```{r}
+install.packages("tidyverse", repos = "https://cran.r-project.org")
+install.packages("formattable", repos = "https://cran.r-project.org")
+
+library(tidyverse)
+library(dplyr)
+library(formattable)
+library(ggplot2)
+```
+
+## Download Data
+Here we read data from github repository and assign it to a dataframe.
+
+```{r}
+githubURL <- ("https://github.com/MEF-BDA503/pj18-muharremcakir81/blob/master/Week4/car_data_aggregate.rds?raw=true")
+All_data<- readRDS(url(githubURL))
+head(All_data)
+```
+
+## DATA UNDERSTANDING & CLEANING CONTROL
+
+Comment: when we grouped data by brandname we saw that some rows were appear like 'TOPLAM' or starts with 'ODD...'
+We cleaned some rows which's brand_name variable include  'TOPLAM' and "ODD....." value.
+
+```{r}
+Control_Data <- All_data%>%
+  group_by (brand_name)%>%
+  summarize(count=n())
+
+
+Cleaned_data <-All_data%>%
+  filter(brand_name != "TOPLAM:")%>%
+  filter(!grepl(pattern ="ODD", brand_name))
+
+#View(Cleaned_data)
+
+```
+
+## DATA MODIFY
+we just select brand_name and total Sales in 201809, 201808 and 201709  periods from all data respectively and assigng each period to diffent dataframe.
+Soma Data manipulation and enrichment operations are done to make comparison between  201809, 201808 and 201709  periods.
+So that we can see the increase rate for each brand. 
+
+```{r}
+
+total_201809 <- Cleaned_data %>%
+            filter (year == 2018, month == 9) %>%
+            select (brand_name,total_total) %>%
+            rename(Total_201809 = total_total)
+#View(total_201809)
+
+#I just select brand_name and total Sales in 201808 period from all data. 
+
+total_201808 <- Cleaned_data %>%
+  filter (year == 2018, month == 8) %>%
+  select (brand_name,total_total) %>%
+  rename(Total_201808 = total_total)
+#View(total_201808)
+
+#I just select brand_name and total Sales in 201709 period from all data. 
+total_201709 <- Cleaned_data %>%
+  filter (year == 2017, month == 9) %>%
+  select (brand_name,total_total) %>%
+  rename(Total_201709 = total_total)
+#View(total_201709)
+
+#I just select brand_name and sum total sales of  first 9 months periods in 2018 from all data. 
+
+total_2018_YTD <- Cleaned_data %>%
+  filter (year == 2018) %>%
+  group_by (brand_name)%>%
+  summarize(Total_2018_YTD = sum(total_total)) %>%
+  select (brand_name,Total_2018_YTD)
+
+#View(total_2018_YTD)
+
+#I just select brand_name and sum total sales of  first 9 months periods in 2017 from all data. 
+
+total_2017_YTD <- Cleaned_data %>%
+  filter (year == 2017,month <= 9) %>%
+  group_by (brand_name)%>%
+  summarize(Total_2017_YTD = sum(total_total)) %>%
+  select (brand_name,Total_2017_YTD)
+
+#View(total_2017_YTD)
+
+```
+##JOIN ALL TEMP DATA SET 
+After join all temp dataframe each other replaced  NA values to 0 in all variable.
+```{r}
+Denormalize_data <- total_201709 %>%
+  full_join(total_201808, by="brand_name")  %>%
+  full_join(total_201809, by="brand_name") %>%
+  full_join(total_2017_YTD, by="brand_name") %>%
+  full_join(total_2018_YTD, by="brand_name")
+
+Denormalize_data <- mutate_all(Denormalize_data,funs(replace(., is.na(.), 0)))
+#View(Denormalize_data)
+```
+##CALCULATE NEW VARIABLE
+```{r}
+
+Brand_Increase_Rate <- Denormalize_data%>%
+  mutate(CM_PM_Total_Rate = round((ifelse (Total_201808  == 0 , NA, #(Total_201809 - Total_201808) *100,
+                                    (Total_201809 - Total_201808) / Total_201808 *100)),1)) %>%
+  mutate(CM_PYM_Total_Rate = round((ifelse (Total_201709  == 0 ,NA, #(Total_201809 - Total_201709) *100,
+                                     (Total_201809 - Total_201709) / Total_201709 *100)),1)) %>%
+  mutate(YTD_PYTD_Total_Rate = round((ifelse (Total_2017_YTD  == 0 ,(Total_2018_YTD - Total_2017_YTD) *100,
+                                     (Total_2018_YTD - Total_2017_YTD) / Total_2017_YTD *100)),1)) %>%
+  mutate(Percentage_2018_YTD = round((Total_2018_YTD / sum(Total_2018_YTD) *100),2), Percentage_2017_YTD = round((Total_2017_YTD / sum(Total_2017_YTD) *100),2)) %>%
+  select(brand_name,Total_201809,Total_201808,Total_201709,Total_2018_YTD,Percentage_2018_YTD,Total_2017_YTD,Percentage_2017_YTD,
+         CM_PM_Total_Rate,CM_PYM_Total_Rate,YTD_PYTD_Total_Rate)%>%
+  arrange(desc(Percentage_2018_YTD))
+
+```
+##FORMAT TABLE
+To recognize the descreasing the sales amount from 2017 to 2018 and to see which brands are sold above the avearage we formatted table...
+It's clear that most of all brands' salling is decrease from 2017 to 2018. 
+**VOLKWAGEN is sold %8.14 of all cars in 2017 and sold %10.9 0f all data in 2018.So Volkwagen's selling perfomance is increasing. Also it's able to increase  total selling in 9 months in 2018 across in 9 months in 2017 (%5,4) 
+**Also VOLVO' is very 's performance is very impressive. its selling amount is increased %35.1 percentage in 9 months in 2018.
+```{r}
+
+color <- formatter("span", style = x ~ style(color = ifelse(x > 0, "green",ifelse(x < 0, "red", "black"))))
+
+
+avg_bold <- formatter("span",  style = x ~ style("font-weight" = ifelse(x > mean(x), "bold", NA)))
+
+
+formattable(Brand_Increase_Rate, 
+            list(Total_2018_YTD = avg_bold,
+                 Total_2017_YTD = avg_bold, 
+                 CM_PM_Total_Rate = color, 
+                 CM_PYM_Total_Rate = color,
+                 YTD_PYTD_Total_Rate = color))
+```
+
+##Finaly there are two grafic analyses here. We take 4 brands (RENAUT,FORD,VOLKSWAGEN,FIAT,HYUNDAI) that achive %50 of total car's saling. 
+
+```{r}
+
+trend_analyses <- Cleaned_data %>%
+  filter (brand_name %in% c("RENAULT","FORD","VOLKSWAGEN","FIAT","HYUNDAI")  & year == 2018)%>%
+  select(brand_name,month,total_total)
+#View(trend_analyses)
+
+ggplot(trend_analyses,aes(x=month,y=total_total ,color = brand_name)) +geom_line()
+
+brand_analyses <- Cleaned_data %>%
+  filter (brand_name %in% c("RENAULT","FORD","VOLKSWAGEN","FIAT","HYUNDAI")  & year== 2018)%>%
+  group_by(brand_name) %>%
+  summarize(total_by_brand = sum(total_total))%>%
+  select(brand_name,total_by_brand)
+#View(brand_analyses)
+
+ggplot(brand_analyses,aes(x=brand_name,y=total_by_brand)) +geom_col()
+```
+
+
