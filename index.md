@@ -1,7 +1,9 @@
 ### Week4 (November 14, 2018)
 We learned  about shiny and reticulate packages.
 shiny is useful to create interactive dashboards on web browsers.
-[ODD car sales analysis (PArt2)](Week4/ODD_Assginment_Part2.html)<br>
+
+ODD Assignment Part2: We collect all period in one dataset. And make some analyses in this dataset. My study is here:
+[ODD car sales analysis (Part2)](Week4/ODD_Assginment_Part2.html)<br>
 
 ### Week3 (October 31, 2018)
 
